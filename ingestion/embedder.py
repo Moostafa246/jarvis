@@ -1,28 +1,23 @@
-import os
-from openai import OpenAI
+from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 
-_client: OpenAI | None = None
+_ef = None
 
 
-def _get_client() -> OpenAI:
-    global _client
-    if _client is None:
-        _client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-    return _client
+def _get_ef():
+    global _ef
+    if _ef is None:
+        _ef = DefaultEmbeddingFunction()
+    return _ef
 
 
 def embed_chunks(chunks: list[dict], batch_size: int = 100) -> list[dict]:
-    client = _get_client()
+    ef = _get_ef()
     texts = [c["text"] for c in chunks]
     vectors = []
 
     for i in range(0, len(texts), batch_size):
         batch = texts[i: i + batch_size]
-        response = client.embeddings.create(
-            model="text-embedding-3-small",
-            input=batch,
-        )
-        vectors.extend([item.embedding for item in response.data])
+        vectors.extend(ef(batch))
 
     for chunk, vector in zip(chunks, vectors):
         chunk["embedding"] = vector

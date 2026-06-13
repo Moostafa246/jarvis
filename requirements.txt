@@ -1,3 +1,4 @@
 chromadb
-openai
+sentence-transformers
 python-dotenv
+anthropic

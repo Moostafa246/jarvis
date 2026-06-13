@@ -26,20 +26,40 @@
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
     font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-  #layout { display: flex; height: 100vh; }
+  #layout { display: flex; height: 100vh; position: relative; }
 
   /* ── Sidebar ── */
   #sidebar {
-    width: 240px;
-    min-width: 240px;
+    width: 260px;
+    min-width: 260px;
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: width 0.2s, min-width 0.2s;
+    transition: transform 0.25s ease, width 0.25s ease, min-width 0.25s ease;
+    z-index: 100;
   }
-  #sidebar.collapsed { width: 0; min-width: 0; border-right: none; }
+
+  /* Desktop collapse */
+  @media (min-width: 641px) {
+    #sidebar.collapsed { width: 0; min-width: 0; border-right: none; }
+  }
+
+  /* Mobile: sidebar overlays as a drawer */
+  @media (max-width: 640px) {
+    #sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      transform: translateX(-100%);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    }
+    #sidebar.open { transform: translateX(0); }
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 99;
+    }
+    #sidebar.open ~ #sidebar-overlay { display: block; }
+  }
 
   #sidebar-header {
     padding: 18px 16px 12px;
@@ -98,7 +118,9 @@
   .conv-date { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
 
   /* ── Main ── */
-  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; width: 100%; }
+  #messages { max-width: 800px; width: 100%; margin: 0 auto; align-self: stretch; }
+  #input-area { max-width: 800px; width: 100%; margin: 0 auto; }
 
   #header {
     display: flex; align-items: center; gap: 12px;
@@ -235,6 +257,7 @@
 <div id="layout">
 
   <!-- Sidebar -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
   <div id="sidebar">
     <div id="sidebar-header">
       <div id="logo">P<span>r</span>ive</div>
@@ -298,12 +321,38 @@
   let sidebarCollapsed = false;
 
   // ── Sidebar ──
+  const isMobile = () => window.innerWidth <= 640;
+
+  function openSidebar() {
+    if (isMobile()) {
+      sidebarEl.classList.add('open');
+    } else {
+      sidebarEl.classList.remove('collapsed');
+      sidebarCollapsed = false;
+    }
+  }
+
+  function closeSidebar() {
+    if (isMobile()) {
+      sidebarEl.classList.remove('open');
+    } else {
+      sidebarEl.classList.add('collapsed');
+      sidebarCollapsed = true;
+    }
+  }
+
   document.getElementById('toggle-sidebar').addEventListener('click', () => {
-    sidebarCollapsed = !sidebarCollapsed;
-    sidebarEl.classList.toggle('collapsed', sidebarCollapsed);
+    if (isMobile()) {
+      sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+    } else {
+      sidebarCollapsed ? openSidebar() : closeSidebar();
+    }
   });
 
-  document.getElementById('new-chat-btn').addEventListener('click', startNewConversation);
+  // Start collapsed on mobile
+  if (isMobile()) { sidebarEl.classList.remove('open'); }
+
+  document.getElementById('new-chat-btn').addEventListener('click', () => { startNewConversation(); if (isMobile()) closeSidebar(); });
 
   function startNewConversation() {
     currentConvId = null;
@@ -349,7 +398,7 @@
         item.dataset.id = conv.id;
         const date = new Date(conv.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         item.innerHTML = `<div>${escHtml(conv.title)}</div><div class="conv-date">${date}</div>`;
-        item.addEventListener('click', () => loadConversation(conv.id));
+        item.addEventListener('click', () => { loadConversation(conv.id); if (isMobile()) closeSidebar(); });
         convList.appendChild(item);
       }
 

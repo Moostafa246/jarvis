@@ -89,3 +89,19 @@ def run():
     total = store.total_chunks()
     print(f"\nTotal chunks in ChromaDB: {total}")
     print("Ingestion complete. Run scripts/query_test.py to validate retrieval.")
+
+    # Push new chunks to Railway if configured
+    railway_url = os.environ.get("RAILWAY_URL")
+    if railway_url and (ai_new > 0 or code_new > 0):
+        print(f"\nPushing to Railway ({railway_url})...")
+        try:
+            import subprocess
+            result = subprocess.run(
+                [sys.executable, "scripts/push_to_railway.py"],
+                capture_output=True, text=True
+            )
+            print(result.stdout)
+            if result.returncode != 0:
+                print(f"[WARNING] Railway push failed: {result.stderr}")
+        except Exception as e:
+            print(f"[WARNING] Railway push error: {e}")

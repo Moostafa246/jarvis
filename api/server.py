@@ -177,6 +177,35 @@ async def chat(req: ChatRequest):
 def health():
     return {"status": "ok"}
 
+
+# --- Ingest endpoint (Mac → Railway) ---
+
+class IngestBatch(BaseModel):
+    ids: list[str]
+    documents: list[str]
+    embeddings: list[list[float]]
+    metadatas: list[dict]
+
+@app.post("/ingest/chunks")
+def ingest_chunks(batch: IngestBatch, authorization: str = ""):
+    secret = os.environ.get("INGEST_SECRET", "")
+    if secret and authorization != f"Bearer {secret}":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    ensure_init()
+    store._collection.upsert(
+        ids=batch.ids,
+        documents=batch.documents,
+        embeddings=batch.embeddings,
+        metadatas=batch.metadatas,
+    )
+    return {"inserted": len(batch.ids)}
+
+@app.get("/ingest/stats")
+def ingest_stats():
+    ensure_init()
+    return {"total_chunks": store.total_chunks()}
+
 @app.get("/", response_class=HTMLResponse)
 async def index():
     html_path = Path(__file__).parent / "static" / "index.html"

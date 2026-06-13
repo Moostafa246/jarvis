@@ -34,7 +34,7 @@ def push_all():
 
     ids = result["ids"]
     documents = result["documents"]
-    embeddings = result["embeddings"]
+    embeddings = [e.tolist() if hasattr(e, "tolist") else list(e) for e in result["embeddings"]]
     metadatas = result["metadatas"]
     total = len(ids)
 

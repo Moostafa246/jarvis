@@ -7,7 +7,7 @@ from typing import AsyncIterator
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -187,7 +187,7 @@ class IngestBatch(BaseModel):
     metadatas: list[dict]
 
 @app.post("/ingest/chunks")
-def ingest_chunks(batch: IngestBatch, authorization: str = ""):
+def ingest_chunks(batch: IngestBatch, authorization: str = Header(default="")):
     secret = os.environ.get("INGEST_SECRET", "")
     if secret and authorization != f"Bearer {secret}":
         from fastapi import HTTPException

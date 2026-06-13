@@ -6,7 +6,7 @@ from pathlib import Path
 
 import anthropic
 
-DATA_DIR = Path(os.path.expanduser("~/jarvis/data/prive-conversations"))
+DATA_DIR = Path(os.environ.get("PRIVE_CONV_DIR", os.path.expanduser("~/jarvis/data/prive-conversations")))
 
 
 def _now() -> str:

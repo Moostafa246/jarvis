@@ -173,6 +173,10 @@ async def chat(req: ChatRequest):
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 @app.get("/", response_class=HTMLResponse)
 async def index():
     html_path = Path(__file__).parent / "static" / "index.html"

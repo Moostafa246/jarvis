@@ -1,4 +1,6 @@
 chromadb
-sentence-transformers
+onnxruntime
 python-dotenv
 anthropic
+fastapi
+uvicorn[standard]

@@ -14,6 +14,6 @@ COPY . .
 RUN mkdir -p /data/prive-conversations /data/chroma_db
 
 # Pre-download the ONNX embedding model so it's baked into the image
-RUN python -c "from chromadb.utils.embedding_functions import DefaultEmbeddingFunction; DefaultEmbeddingFunction()(["warmup"])"
+RUN python -c 'from chromadb.utils.embedding_functions import DefaultEmbeddingFunction; DefaultEmbeddingFunction()(["warmup"])'
 
 CMD ["sh", "-c", "uvicorn api.server:app --host 0.0.0.0 --port ${PORT:-8000}"]

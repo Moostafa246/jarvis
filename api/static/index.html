@@ -59,7 +59,20 @@
       z-index: 99;
     }
     #sidebar.open ~ #sidebar-overlay { display: block; }
+    /* On mobile, toggle button always visible in header — no sidebar toggle needed inside */
+    #toggle-sidebar { display: flex; }
   }
+
+  /* Close button inside sidebar header on mobile */
+  #sidebar-close {
+    display: none;
+    width: 26px; height: 26px; border-radius: 6px; border: none;
+    background: none; color: var(--text-dim); cursor: pointer;
+    align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  #sidebar-close:hover { background: var(--surface2); color: var(--text); }
+  @media (max-width: 640px) { #sidebar-close { display: flex; } }
 
   #sidebar-header {
     padding: 18px 16px 12px;
@@ -261,6 +274,9 @@
   <div id="sidebar">
     <div id="sidebar-header">
       <div id="logo">P<span>r</span>ive</div>
+      <button id="sidebar-close" title="Close sidebar" onclick="closeSidebar()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
       <button id="new-chat-btn" title="New conversation">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
